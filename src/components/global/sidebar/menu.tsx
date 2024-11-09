@@ -178,7 +178,7 @@ const SideBarMenu = ({
                     )}
                 </>
             ) : (
-                <></>
+                <>Hello</>
             )}
         </div>
     )
