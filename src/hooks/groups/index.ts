@@ -504,7 +504,10 @@ export const useGroupInfo = () => {
 
     const router = useRouter()
 
-    if (!data) router.push("/explore")
+    if (!data) {
+        router.push("/explore")
+        return { group: undefined }
+    }
 
     const { status, group } = data as { status: number; group: GroupStateProps }
 
