@@ -6,6 +6,7 @@ import { CarotSort } from "@/icons"
 import { cn } from "@/lib/utils"
 import { Group, Plus } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { v4 } from "uuid"
 import { DropDown } from "../dowp-down"
 import SideBarMenu from "./menu"
@@ -56,12 +57,12 @@ export interface IGroups {
         | undefined
 }
 const SideBar = ({ groupid, userid, mobile }: Props) => {
+    const pathname = usePathname()
     const { groupInfo, groups, mutate, variables, isPending, channels } =
         useSideBar(groupid)
     console.log(groups.groups)
 
     useGroupChatOnline(userid)
-
     return (
         <div
             className={cn(
@@ -112,28 +113,34 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
             )}
 
             <div className="flex flex-col gap-y-5">
-                <div className="flex justify-between items-center">
-                    <p className="text-xs text-[#F7ECE9]">CHANNELS</p>
-                    {userid === groupInfo.group?.userId && (
-                        <Plus
-                            size={16}
-                            className={cn(
-                                "text-themeTextGray cursor-pointer",
-                                isPending && "opacity-70",
-                            )}
-                            {...(!isPending && {
-                                onClick: () =>
-                                    mutate({
-                                        id: v4(),
-                                        icon: "general",
-                                        name: "unnamed",
-                                        createdAt: new Date(),
-                                        groupId: groupid,
-                                    }),
-                            })}
-                        />
-                    )}
-                </div>
+                {!pathname.includes("settings") ? (
+                    <div className="flex justify-between items-center">
+                        <p className="text-xs text-[#F7ECE9]">CHANNELS</p>
+                        {userid === groupInfo.group?.userId && (
+                            <Plus
+                                size={16}
+                                className={cn(
+                                    "text-themeTextGray cursor-pointer",
+                                    isPending && "opacity-70",
+                                )}
+                                {...(!isPending && {
+                                    onClick: () =>
+                                        mutate({
+                                            id: v4(),
+                                            icon: "general",
+                                            name: "unnamed",
+                                            createdAt: new Date(),
+                                            groupId: groupid,
+                                        }),
+                                })}
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex justify-between items-center">
+                        <p className="text-xs text-[#F7ECE9]">SETTINGS</p>
+                    </div>
+                )}
                 <SideBarMenu
                     channels={channels?.channels!}
                     optimisticChannel={variables}
@@ -143,7 +150,14 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
                     userId={userid}
                 />
                 <hr />
-                <p className="text-xs text-[#F7ECE9]">COURSES</p>
+
+                {!pathname.includes("settings") ? (
+                    <p className="text-xs text-[#F7ECE9]">COURSES</p>
+                ) : (
+                    <Link href="#" onClick={() => window.history.back()}>
+                        <p className="text-xs text-[#F7ECE9]">GO BACK</p>
+                    </Link>
+                )}
             </div>
         </div>
     )
