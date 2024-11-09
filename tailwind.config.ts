@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss"
+const {
+    default: flattenColorPalette,
+} = require("tailwindcss/lib/util/flattenColorPalette")
 
 const config = {
     darkMode: ["class"],
@@ -8,6 +11,7 @@ const config = {
         "./app/**/*.{ts,tsx}",
         "./src/**/*.{ts,tsx}",
     ],
+
     prefix: "",
     theme: {
         container: {
@@ -17,8 +21,17 @@ const config = {
                 "2xl": "1400px",
             },
         },
+        backgroundImage: {
+            "radial-gradient":
+                "radial-gradient(circle at 50% 40%, white, black)",
+        },
         extend: {
             colors: {
+                themeBlack: "#09090B",
+                themeGray: "#27272A",
+                themeDarkGray: "#27272A",
+                themeTextGray: "#B4B0AE",
+                themeTextWhite: "#F7ECE9",
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
@@ -60,21 +73,60 @@ const config = {
             },
             keyframes: {
                 "accordion-down": {
-                    from: { height: "0" },
-                    to: { height: "var(--radix-accordion-content-height)" },
+                    from: {
+                        height: "0",
+                    },
+                    to: {
+                        height: "var(--radix-accordion-content-height)",
+                    },
                 },
                 "accordion-up": {
-                    from: { height: "var(--radix-accordion-content-height)" },
-                    to: { height: "0" },
+                    from: {
+                        height: "var(--radix-accordion-content-height)",
+                    },
+                    to: {
+                        height: "0",
+                    },
+                },
+                marquee: {
+                    from: {
+                        transform: "translateX(0)",
+                    },
+                    to: {
+                        transform: "translateX(calc(-100% - var(--gap)))",
+                    },
+                },
+                "marquee-vertical": {
+                    from: {
+                        transform: "translateY(0)",
+                    },
+                    to: {
+                        transform: "translateY(calc(-100% - var(--gap)))",
+                    },
                 },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
+                marquee: "marquee var(--duration) infinite linear",
+                "marquee-vertical":
+                    "marquee-vertical var(--duration) linear infinite",
             },
         },
     },
-    plugins: [require("tailwindcss-animate")],
+
+    plugins: [require("tailwindcss-animate"), addVariablesForColors],
 } satisfies Config
 
 export default config
+
+function addVariablesForColors({ addBase, theme }: any) {
+    let allColors = flattenColorPalette(theme("colors"))
+    let newVars = Object.fromEntries(
+        Object.entries(allColors).map(([key, val]) => [`--${key}`, val]),
+    )
+
+    addBase({
+        ":root": newVars,
+    })
+}
