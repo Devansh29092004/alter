@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input"
 import { SIDEBAR_SETTINGS_MENU } from "@/constants/menus"
 import { useChannelInfo } from "@/hooks/channels"
+import { useCourses } from "@/hooks/courses"
 import { cn } from "@/lib/utils"
 import { Trash } from "lucide-react"
 import Link from "next/link"
@@ -38,7 +39,7 @@ const SideBarMenu = ({
 }: Props) => {
     const pathname = usePathname()
     const currentPage = pathname.split("/").pop()
-
+    const { data } = useCourses(groupid)
     const {
         channel: current,
         onEditChannel,
@@ -176,6 +177,28 @@ const SideBarMenu = ({
                                 </Link>
                             ),
                     )}
+                    {/* Course Cards Section */}
+                    <hr className="my-5" />
+                    <p className="text-xs mb-5 text-[#F7ECE9]">COURSES</p>
+                    {data?.courses?.map((course) => (
+                        <Link
+                            href={`/group/${groupid}/courses/${course.id}`}
+                            key={course.id}
+                        >
+                            <div className="flex bg-transparent border-themeGray h-full  overflow-hidden hover:bg-[#27272a] rounded-xl">
+                                <img
+                                    src={`https://ucarecdn.com/${course.thumbnail}/`}
+                                    alt={`${course.name} cover`}
+                                    className="h-[50px] w-[50px] opacity-90 rounded-xl"
+                                />
+                                <div className="h-full flex pl-5 justify-center items-center">
+                                    <h2 className="text-lg text-white font-semibold">
+                                        {course.name}
+                                    </h2>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
                 </>
             ) : (
                 <>Hello</>

@@ -1,18 +1,23 @@
 "use client"
 import {
+    onGetAllGroupMembers,
+    onGetAllUserMessages,
     onGetExploreGroup,
     onGetGroupChannels,
     onGetGroupInfo,
     onJoinGroup,
     onSearchGroups,
+    onSendMessage,
     onUpdateGroupGallery,
     onUpDateGroupSettings,
 } from "@/actions/groups"
 import { onGetActiveSubscription } from "@/actions/payments"
+import { SendNewMessageSchema } from "@/components/forms/chater/schema"
 import { GroupSettingsSchema } from "@/components/forms/group-settings/schema"
 import { UpdateGallerySchema } from "@/components/forms/media-gallery/scherma"
 import { upload } from "@/lib/uploadcare"
 import { supabaseClient, validateURLString } from "@/lib/utils"
+import { onChat } from "@/redux/slices/chats-slices"
 import {
     onClearList,
     onInfiniteScroll,
@@ -26,12 +31,13 @@ import {
 import { AppDispatch } from "@/redux/store"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { JSONContent } from "novel"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useDispatch } from "react-redux"
 import { toast } from "sonner"
+import { v4 } from "uuid"
 import { z } from "zod"
 
 export const useGroupChatOnline = (userid: string) => {
@@ -607,4 +613,95 @@ export const useJoinFree = (groupid: string) => {
     }
 
     return { onJoinFreeGroup }
+}
+
+export const useGroupChat = (groupid: string) => {
+    const { data } = useQuery({
+        queryKey: ["member-chats"],
+        queryFn: () => onGetAllGroupMembers(groupid),
+    })
+
+    const pathname = usePathname()
+
+    return { data, pathname }
+}
+
+export const useChatWindow = (recieverid: string) => {
+    const { data, isFetched } = useQuery({
+        queryKey: ["user-messages"],
+        queryFn: () => onGetAllUserMessages(recieverid),
+    })
+
+    const messageWindowRef = useRef<HTMLDivElement | null>(null)
+
+    const onScrollToBottom = () => {
+        messageWindowRef.current?.scroll({
+            top: messageWindowRef.current.scrollHeight,
+            left: 0,
+            behavior: "smooth",
+        })
+    }
+
+    useEffect(() => {
+        supabaseClient
+            .channel("table-db-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "Message",
+                },
+                async (payload) => {
+                    dispatch(
+                        onChat({
+                            chat: [
+                                ...(payload.new as {
+                                    id: string
+                                    message: string
+                                    createdAt: Date
+                                    senderid: string | null
+                                    recieverId: string | null
+                                }[]),
+                            ],
+                        }),
+                    )
+                },
+            )
+            .subscribe()
+    }, [])
+
+    useEffect(() => {
+        onScrollToBottom()
+    }, [messageWindowRef])
+
+    const dispatch: AppDispatch = useDispatch()
+
+    if (isFetched && data?.messages) dispatch(onChat({ chat: data.messages }))
+
+    return { messageWindowRef }
+}
+
+export const useSendMessage = (recieverId: string) => {
+    const { register, reset, handleSubmit } = useForm<
+        z.infer<typeof SendNewMessageSchema>
+    >({
+        resolver: zodResolver(SendNewMessageSchema),
+    })
+
+    const { mutate } = useMutation({
+        mutationKey: ["send-new-message"],
+        mutationFn: (data: { messageid: string; message: string }) =>
+            onSendMessage(recieverId, data.messageid, data.message),
+        onMutate: () => reset(),
+        onSuccess: () => {
+            return
+        },
+    })
+
+    const onSendNewMessage = handleSubmit(async (values) =>
+        mutate({ messageid: v4(), message: values.message }),
+    )
+
+    return { onSendNewMessage, register }
 }

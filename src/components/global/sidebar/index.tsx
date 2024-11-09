@@ -152,7 +152,7 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
                 <hr />
 
                 {!pathname.includes("settings") ? (
-                    <p className="text-xs text-[#F7ECE9]">COURSES</p>
+                    <></>
                 ) : (
                     <Link href="#" onClick={() => window.history.back()}>
                         <p className="text-xs text-[#F7ECE9]">GO BACK</p>
