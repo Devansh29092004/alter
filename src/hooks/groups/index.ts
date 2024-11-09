@@ -1,18 +1,18 @@
 "use client"
 import {
+    onAddCustomDomain,
     onGetAllGroupMembers,
     onGetAllUserMessages,
+    onGetDomainConfig,
     onGetExploreGroup,
-    onGetGroupChannels,
     onGetGroupInfo,
-    onJoinGroup,
     onSearchGroups,
     onSendMessage,
-    onUpdateGroupGallery,
     onUpDateGroupSettings,
+    onUpdateGroupGallery,
 } from "@/actions/groups"
-import { onGetActiveSubscription } from "@/actions/payments"
 import { SendNewMessageSchema } from "@/components/forms/chater/schema"
+import { AddCustomDomainSchema } from "@/components/forms/domain/schema"
 import { GroupSettingsSchema } from "@/components/forms/group-settings/schema"
 import { UpdateGallerySchema } from "@/components/forms/media-gallery/scherma"
 import { upload } from "@/lib/uploadcare"
@@ -30,7 +30,7 @@ import {
 } from "@/redux/slices/search-slice"
 import { AppDispatch } from "@/redux/store"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { usePathname, useRouter } from "next/navigation"
 import { JSONContent } from "novel"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
@@ -299,6 +299,24 @@ export const useGroupSettings = (groupid: string) => {
         onDescription,
     }
 }
+export const useGroupList = (query: string) => {
+    const { data } = useQuery({
+        queryKey: [query],
+    })
+
+    const dispatch: AppDispatch = useDispatch()
+
+    useLayoutEffect(() => {
+        dispatch(onClearList({ data: [] }))
+    }, [])
+
+    const { groups, status } = data as {
+        groups: GroupStateProps[]
+        status: number
+    }
+
+    return { groups, status }
+}
 
 export const useExploreSlider = (query: string, paginate: number) => {
     const [onLoadSlider, setOnLoadSlider] = useState<boolean>(false)
@@ -323,23 +341,22 @@ export const useExploreSlider = (query: string, paginate: number) => {
     return { refetch, isFetching, data, onLoadSlider }
 }
 
-export const useGroupList = (query: string) => {
+export const useGroupInfo = () => {
     const { data } = useQuery({
-        queryKey: [query],
+        queryKey: ["about-group-info"],
     })
 
-    const dispatch: AppDispatch = useDispatch()
+    const router = useRouter()
 
-    useLayoutEffect(() => {
-        dispatch(onClearList({ data: [] }))
-    }, [])
+    if (!data) router.push("/explore")
 
-    const { groups, status } = data as {
-        groups: GroupStateProps[]
-        status: number
+    const { group, status } = data as { status: number; group: GroupStateProps }
+
+    if (status !== 200) router.push("/explore")
+
+    return {
+        group,
     }
-
-    return { groups, status }
 }
 
 export const useGroupAbout = (
@@ -503,27 +520,6 @@ export const useGroupAbout = (
     }
 }
 
-export const useGroupInfo = () => {
-    const { data } = useQuery({
-        queryKey: ["about-group-info"],
-    })
-
-    const router = useRouter()
-
-    if (!data) {
-        router.push("/explore")
-        return { group: undefined }
-    }
-
-    const { status, group } = data as { status: number; group: GroupStateProps }
-
-    if (status !== 200) router.push("/explore")
-
-    return {
-        group,
-    }
-}
-
 export const useMediaGallery = (groupid: string) => {
     const {
         register,
@@ -589,30 +585,6 @@ export const useMediaGallery = (groupid: string) => {
         onUpdateGallery,
         isPending,
     }
-}
-
-export const useActiveGroupSubscription = (groupId: string) => {
-    const { data } = useQuery({
-        queryKey: ["active-subscription"],
-        queryFn: () => onGetActiveSubscription(groupId),
-    })
-
-    return { data }
-}
-
-export const useJoinFree = (groupid: string) => {
-    const router = useRouter()
-    const onJoinFreeGroup = async () => {
-        const member = await onJoinGroup(groupid)
-        if (member?.status === 200) {
-            const channels = await onGetGroupChannels(groupid)
-            router.push(
-                `/group/${groupid}/channel/${channels?.channels?.[0].id}`,
-            )
-        }
-    }
-
-    return { onJoinFreeGroup }
 }
 
 export const useGroupChat = (groupid: string) => {
@@ -704,4 +676,48 @@ export const useSendMessage = (recieverId: string) => {
     )
 
     return { onSendNewMessage, register }
+}
+
+export const useCustomDomain = (groupid: string) => {
+    const {
+        handleSubmit,
+        register,
+        formState: { errors },
+        reset,
+    } = useForm<z.infer<typeof AddCustomDomainSchema>>({
+        resolver: zodResolver(AddCustomDomainSchema),
+    })
+
+    const client = useQueryClient()
+
+    const { data } = useQuery({
+        queryKey: ["domain-config"],
+        queryFn: () => onGetDomainConfig(groupid),
+    })
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: (data: { domain: string }) =>
+            onAddCustomDomain(groupid, data.domain),
+        onMutate: reset,
+        onSuccess: (data) => {
+            return toast(data.status === 200 ? "Success" : "Error", {
+                description: data.message,
+            })
+        },
+        onSettled: async () => {
+            return await client.invalidateQueries({
+                queryKey: ["domain-config"],
+            })
+        },
+    })
+
+    const onAddDomain = handleSubmit(async (values) => mutate(values))
+
+    return {
+        onAddDomain,
+        isPending,
+        register,
+        errors,
+        data,
+    }
 }
