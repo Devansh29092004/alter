@@ -31,7 +31,7 @@ const GroupChannelPage = async ({ params }: Props) => {
     return (
         <HydrationBoundary state={dehydrate(client)}>
             <div className="grid lg:grid-cols-4 grid-cols-1 w-full flex-1 h-0 gap-x-5 px-5 s">
-                Hello
+                {params.channelid}
             </div>
         </HydrationBoundary>
     )

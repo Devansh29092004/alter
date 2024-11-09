@@ -110,39 +110,6 @@ const SideBar = ({ groupid, userid, mobile }: Props) => {
                         ))}
                 </DropDown>
             )}
-
-            <div className="flex flex-col gap-y-5">
-                <div className="flex justify-between items-center">
-                    <p className="text-xs text-[#F7ECE9]">CHANNELS</p>
-                    {userid === groupInfo.group?.userId && (
-                        <Plus
-                            size={16}
-                            className={cn(
-                                "text-themeTextGray cursor-pointer",
-                                isPending && "opacity-70",
-                            )}
-                            {...(!isPending && {
-                                onClick: () =>
-                                    mutate({
-                                        id: v4(),
-                                        icon: "general",
-                                        name: "unnamed",
-                                        createdAt: new Date(),
-                                        groupId: groupid,
-                                    }),
-                            })}
-                        />
-                    )}
-                </div>
-                <SideBarMenu
-                    channels={channels?.channels!}
-                    optimisticChannel={variables}
-                    loading={isPending}
-                    groupid={groupid}
-                    groupUserId={groupInfo.group?.userId!}
-                    userId={userid}
-                />
-            </div>
         </div>
     )
 }
