@@ -17,43 +17,43 @@ export const useNavigation = () => {
 }
 
 // export const useSideBar = (groupid: string) => {
-    // const { data: groups } = useQuery({
-    //     queryKey: ["user-groups"],
-    // }) as { data: IGroups }
+// const { data: groups } = useQuery({
+//     queryKey: ["user-groups"],
+// }) as { data: IGroups }
 
-    // const { data: groupInfo } = useQuery({
-    //     queryKey: ["group-info"],
-    // }) as { data: IGroupInfo }
+// const { data: groupInfo } = useQuery({
+//     queryKey: ["group-info"],
+// }) as { data: IGroupInfo }
 
-    // const { data: channels } = useQuery({
-    //     queryKey: ["group-channels"],
-    //     queryFn: () => onGetGroupChannels(groupid),
-    // })
+// const { data: channels } = useQuery({
+//     queryKey: ["group-channels"],
+//     queryFn: () => onGetGroupChannels(groupid),
+// })
 
-    // const client = useQueryClient()
+// const client = useQueryClient()
 
-    //we use usemutation to optimistically add a channel
-    //once the mutation is settled or complete we invalidate the group-channel query and trigger a refetch //this makes the optimistic ui seamless
+//we use usemutation to optimistically add a channel
+//once the mutation is settled or complete we invalidate the group-channel query and trigger a refetch //this makes the optimistic ui seamless
 
-    // const { isPending, mutate, isError, variables } = useMutation({
-    //     mutationFn: (data: {
-    //         id: string
-    //         name: string
-    //         icon: string
-    //         createdAt: Date
-    //         groupId: string | null
-    //     }) =>
-    //         onCreateNewChannel(groupid, {
-    //             id: data.id,
-    //             name: data.name.toLowerCase(),
-    //             icon: data.icon,
-    //         }),
-    //     onSettled: async () => {
-    //         return await client.invalidateQueries({
-    //             queryKey: ["group-channels"],
-    //         })
-    //     },
-    // })
+// const { isPending, mutate, isError, variables } = useMutation({
+//     mutationFn: (data: {
+//         id: string
+//         name: string
+//         icon: string
+//         createdAt: Date
+//         groupId: string | null
+//     }) =>
+//         onCreateNewChannel(groupid, {
+//             id: data.id,
+//             name: data.name.toLowerCase(),
+//             icon: data.icon,
+//         }),
+//     onSettled: async () => {
+//         return await client.invalidateQueries({
+//             queryKey: ["group-channels"],
+//         })
+//     },
+// })
 
 //     if (isPending)
 //         toast("Success", {

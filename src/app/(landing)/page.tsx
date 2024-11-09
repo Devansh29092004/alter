@@ -1,7 +1,9 @@
+"use client"
 import dynamic from "next/dynamic"
 import CallToAction from "./_components/call-to-action"
 import DashboardSnippet from "./_components/dashboard-snippet"
 import { Features } from "./_components/features"
+import { PricingSection } from "./_components/pricing"
 import { LearnSkill } from "./_components/learn-skills"
 
 // const PricingSection = dynamic(
@@ -19,9 +21,9 @@ export default function Home() {
                 <CallToAction />
                 <DashboardSnippet />
             </div>
-            {/* <LearnSkill />
+            <LearnSkill />
             <Features />
-            <PricingSection /> */}
+            <PricingSection />
         </main>
     )
 }
