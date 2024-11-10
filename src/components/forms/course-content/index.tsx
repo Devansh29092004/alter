@@ -37,7 +37,7 @@ export const CourseContentForm = ({
     return groupid === userid ? (
         <form
             onSubmit={onUpdateContent}
-            className="px-5 py-10 flex flex-col"
+            className="px-5 mx-5 py-10 flex flex-col"
             ref={editor}
         >
             <BlockTextEditor

@@ -98,12 +98,12 @@ export const GROUP_PAGE_MENU: MenuProps[] = [
         icon: <Document />,
         path: "#About",
     },
-    {
-        id: 5,
-        label: "Huddle",
-        icon: <Chat />,
-        path: "#Huddle",
-    },
+    // {
+    //     id: 5,
+    //     label: "Huddle",
+    //     icon: <Chat />,
+    //     path: "#Huddle",
+    // },
 ]
 
 export const SIDEBAR_SETTINGS_MENU: MenuProps[] = [

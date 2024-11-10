@@ -7,8 +7,7 @@ import {
     Chat,
     Courses,
     Document,
-    Home,
-    PersonalDevelopment,
+    Home
 } from "@/icons"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -51,23 +50,23 @@ const Menu = ({ orientation, groupid, channelid }: MenuProps) => {
             icon: <Buisness />,
             path: "#Events",
         },
-        {
-            id: 3,
-            label: "Members",
-            icon: <PersonalDevelopment />,
-            path: "#Members",
-        },
+        // {
+        //     id: 3,
+        //     label: "Members",
+        //     icon: <PersonalDevelopment />,
+        //     path: "#Members",
+        // },
         {
             id: 4,
             label: "About",
             icon: <Document />,
-            path: "#About",
+            path: "/about/"  + groupid ,
         },
         {
             id: 5,
-            label: "Huddle",
+            label: "Chats",
             icon: <Chat />,
-            path: "#Huddle",
+            path: "/group/" + groupid + "/messages",
         },
     ]
     switch (orientation) {
